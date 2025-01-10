@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import (
     QWidget, QLabel, QComboBox, QLineEdit, QHBoxLayout
 )
 import subprocess
+from ui_style import apply_styles  
 
 class CarApp(QMainWindow):
     def __init__(self, car_data):
@@ -64,13 +65,12 @@ class CarApp(QMainWindow):
         self.load_table_data(self.car_data)
         main_layout.addWidget(self.table)
 
-        # Sahibinden linkine git
-        self.link_button = QPushButton("Go to Sahibinden")
+        self.link_button = QPushButton("Web siteyi ziyaret et")
         self.link_button.clicked.connect(self.open_sahibinden_link)
         main_layout.addWidget(self.link_button)
 
-        # Scraping başlatma butonu
-        self.scrape_button = QPushButton("Start Scraping")
+        # Scraping başlatıyoruz
+        self.scrape_button = QPushButton("Scraping Yap")
         self.scrape_button.clicked.connect(self.start_scraping)
         main_layout.addWidget(self.scrape_button)
 
@@ -124,8 +124,8 @@ class CarApp(QMainWindow):
             print(f"Hata: {e}")
 
 if __name__ == "__main__":
-    # SQLite veritabanından veri yüklenmesi
-    db_path = 'cars.sqlite'  # Aynı klasördeki veritabanı dosyası
+    # database den verilerin updatesi
+    db_path = 'cars.sqlite'  
     conn = sqlite3.connect(db_path)
     query = "SELECT * FROM carsdata"
 
@@ -137,6 +137,10 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     main_window = CarApp(car_data)
+
+
+    apply_styles(app, main_window)
+
     main_window.show()
     sys.exit(app.exec_())
 
