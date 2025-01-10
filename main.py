@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QTableWidget, QTableWidgetItem, QVBoxLayout, QPushButton,
     QWidget, QLabel, QComboBox, QLineEdit, QHBoxLayout
 )
+import subprocess
 
 class CarApp(QMainWindow):
     def __init__(self, car_data):
@@ -24,6 +25,7 @@ class CarApp(QMainWindow):
 
         main_layout = QVBoxLayout()
 
+        # Filtreleme alanları
         filter_layout = QHBoxLayout()
 
         self.brand_filter = QComboBox()
@@ -55,39 +57,25 @@ class CarApp(QMainWindow):
 
         main_layout.addLayout(filter_layout)
 
+        # Tablo
         self.table = QTableWidget()
         self.table.setColumnCount(len(self.car_data.columns))
         self.table.setHorizontalHeaderLabels(self.car_data.columns)
         self.load_table_data(self.car_data)
         main_layout.addWidget(self.table)
 
+        # Sahibinden linkine git
         self.link_button = QPushButton("Go to Sahibinden")
         self.link_button.clicked.connect(self.open_sahibinden_link)
         main_layout.addWidget(self.link_button)
 
+        # Scraping başlatma butonu
+        self.scrape_button = QPushButton("Start Scraping")
+        self.scrape_button.clicked.connect(self.start_scraping)
+        main_layout.addWidget(self.scrape_button)
+
         container = QWidget()
         container.setLayout(main_layout)
-        container.setStyleSheet(
-            """
-            QWidget {
-            background-color: #FF0000; /* Kırmızı arka plan */
-            }
-            QLabel {
-            color: white; /* Beyaz yazılar */
-            font-weight: bold;
-            }
-            QPushButton {
-            background-color: red; /* Siyah buton arka planı */
-            color: white; /* Beyaz yazı */
-            border-radius: 5px;
-            padding: 5px;
-            }
-            QPushButton:hover {
-            background-color: #FF6347; /* Açık kırmızı (hover efekti) */
-            }
-            """
-
-        )
         self.setCentralWidget(container)
 
     def load_table_data(self, data):
@@ -126,12 +114,20 @@ class CarApp(QMainWindow):
         url = "https://www.sahibinden.com/otomobil"
         webbrowser.open(url)
 
-if __name__ == "__main__":
+    def start_scraping(self):
+        # Scraping işlemini başlat
+        try:
+            subprocess.run(["jupyter", "nbconvert", "--to", "script", "cars.ipynb"])
+            subprocess.run(["python", "cars.py"])
+            print("Scraping işlemi tamamlandı.")
+        except Exception as e:
+            print(f"Hata: {e}")
 
+if __name__ == "__main__":
     # SQLite veritabanından veri yüklenmesi
     db_path = 'cars.sqlite'  # Aynı klasördeki veritabanı dosyası
     conn = sqlite3.connect(db_path)
-    query = "SELECT * FROM carsdata"  # Tablo adı 'cars' olmalı, gerekirse düzeltin
+    query = "SELECT * FROM carsdata"
 
     car_data = pd.read_sql_query(query, conn)
     conn.close()
@@ -143,3 +139,4 @@ if __name__ == "__main__":
     main_window = CarApp(car_data)
     main_window.show()
     sys.exit(app.exec_())
+
